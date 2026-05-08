@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محول المساحات العراقي</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>أهلاً بك في برنامج تحويل المساحات في العراق</h2>
+    <input type="number" id="value" placeholder="أدخل القيمة">
+    <div class="buttons">
+      <button onclick="toDunum()">إلى دونم</button>
+      <button onclick="toMeter()">إلى متر مربع</button>
+      <button onclick="exitApp()">خروج</button>
+    </div>
+    <p id="result"></p>
+    <footer>تم إنشاء التطبيق بواسطة أحمد مهدي</footer>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</body>
+</html>
