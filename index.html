@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محول المساحات العراقي</title>
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+  <style>
+    body {
+      font-family: Tahoma, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      width: 95%;
+      max-width: 500px;
+      box-sizing: border-box;
+    }
+    .window { display: none; text-align: center; }
+    .window.active { display: block; }
+    h1 { font-size: 1.5rem; color: #2c3e50; margin-bottom: 20px; }
+    h2 { font-size: 1.2rem; color: #3498db; margin-bottom: 15px; }
+    .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .input-field { display: flex; flex-direction: column; margin-bottom: 15px; text-align: right; }
+    .input-field label { font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; color: #555; }
+    input { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-size: 16px; background: #f9f9f9; box-sizing: border-box; }
+    input:focus { border-color: #3498db; outline: none; background: #fff; }
+    input[readonly] { background: #eef2f3; color: #2c3e50; font-weight: bold; }
+    .button-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .btn { padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: all 0.3s; }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-success { background: #27ae60; color: white; }
+    .btn-warning { background: #f39c12; color: white; }
+    .btn-secondary { background: #95a5a6; color: white; }
+    .btn-danger { background: #e74c3c; color: white; }
+    .watermark { margin-top: 15px; font-size: 11px; color: #8e44ad; font-weight: bold; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- النافذة الرئيسية -->
+    <div id="mainNav" class="window active">
+      <h1>برنامج تحويل المساحات في العراق</h1>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="showWindow('dunumToMeter')">من دونم إلى متر</button>
+        <button class="btn btn-primary" onclick="showWindow('meterToDunum')">من متر إلى دونم</button>
+        <button class="btn btn-danger" onclick="exitApp()">خروج</button>
+      </div>
+    </div>
+
+    <!-- نافذة التحويل من دونم إلى متر -->
+    <div id="dunumToMeter" class="window">
+      <h2>تحويل من دونم إلى متر مربع</h2>
+      <div class="input-grid">
+        <div class="input-field"><label>الدونم</label><input type="number" id="inDunum" placeholder="0"></div>
+        <div class="input-field"><label>الأولك</label><input type="number" id="inOlk" placeholder="0"></div>
+        <div class="input-field"><label>المتر</label><input type="number" id="inMeter" placeholder="0"></div>
+      </div>
+      <div class="input-field"><label>الناتج الإجمالي (م²):</label><input type="text" id="outTotalMeter" readonly></div>
+      <div class="button-group">
+        <button class="btn btn-success" onclick="fnCalculateToMeter()">تحويل</button>
+        <button class="btn btn-warning" onclick="fnClear('dunumToMeter')">مسح البيانات</button>
+        <button class="btn btn-secondary" onclick="showWindow('mainNav')">رجوع</button>
+      </div>
+    </div>
+
+    <!-- نافذة التحويل من متر إلى دونم -->
+    <div id="meterToDunum" class="window">
+      <h2>تحويل من متر مربع إلى دونم</h2>
+      <div class="input-field"><label>أدخل المساحة بالمتر المربع:</label><input type="number" id="inTotalMeter" placeholder="مثال: 2650"></div>
+      <div class="input-grid">
+        <div class="input-field"><label>دونم</label><input type="text" id="outD" readonly></div>
+        <div class="input-field"><label>أولك</label><input type="text" id="outO" readonly></div>
+        <div class="input-field"><label>متر</label><input type="text" id="outM" readonly></div>
+      </div>
+      <div class="button-group">
+        <button class="btn btn-success" onclick="fnCalculateToDunum()">تحويل</button>
+        <button class="btn btn-warning" onclick="fnClear('meterToDunum')">مسح البيانات</button>
+        <button class="btn btn-secondary" onclick="showWindow('mainNav')">رجوع</button>
+      </div>
+    </div>
+
+    <div class="watermark">تم إنشاء التطبيق بواسطة أحمد مهدي</div>
+  </div>
+
+  <script>
+    function showWindow(id) {
+      document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function fnCalculateToMeter() {
+      const d = parseFloat(document.getElementById('inDunum').value) || 0;
+      const o = parseFloat(document.getElementById('inOlk').value) || 0;
+      const m = parseFloat(document.getElementById('inMeter').value) || 0;
+      const total = (d * 2500) + (o * 100) + m;
+      document.getElementById('outTotalMeter').value = total;
+    }
+
+    function fnCalculateToDunum() {
+      let totalM = parseFloat(document.getElementById('inTotalMeter').value) || 0;
+      let dResult = Math.floor(totalM / 2500);
+      let remainingForOlk = totalM % 2500;
+      let oResult = Math.floor(remainingForOlk / 100);
+      let remainingForMeter = remainingForOlk % 100;
+      document.getElementById('outD').value = dResult;
+      document.getElementById('outO').value = oResult;
+      document.getElementById('outM').value = remainingForMeter;
+    }
+
+    function fnClear(winId) {
+      document.querySelectorAll(`#${winId} input`).forEach(i => {
+        if (!i.readOnly) i.value = '';
+        else i.value = '';
+      });
+    }
+
+    function exitApp() {
+      alert("لإغلاق التطبيق، اخرج من الصفحة أو امسح الأيقونة من الهاتف.");
+    }
+  </script>
+</body>
+</html>
